@@ -1,0 +1,390 @@
+import 'package:AlcaTiktok/Api/networkApi.dart';
+import 'package:AlcaTiktok/Home/pages/Profile/ProfileDrawer/ProfileDrawerPages/ProfileDrawerPagesCreatePage/UploadImageDemo.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+
+//http://njoy.myalca.com/api/user_page/category_listing
+class ProfileDrawerPagesCreatePage extends StatefulWidget {
+  @override
+    _ProfileDrawerPagesCreatePageState createSt ate() =>
+        _ProfileDrawerPagesCreatePageState();
+  }
+
+
+class _ProfileDrawerPagesCreatePageState
+    extends State<ProfileDrawerPagesCreatePage> {
+  var pageNameController = TextEditingController();
+  var pageWebsiteController = TextEditingController();
+  var pageAboutController = TextEditingController();
+  var pageCategoryController = TextEditingController();
+  bool _isLoading = false;
+  List<String> list = [
+    "Travel",
+    "Well-being",
+    "Food",
+    "Dance",
+    "Art",
+    "Style",
+    "Humor",
+    "Music",
+    "Beauty"
+  ];
+  File _profileImage, _coverImage;
+  Color _myColor = Colors.green;
+  String base64Image;
+  File tmpFile;
+  String errMessage = 'Error uploading image';
+  // Image profileImage, coverImage;
+  Future<File> file;
+  String status = '';
+  chooseImage() {
+    setState(() {
+      file = ImagePicker.pickImage(source: ImageSource.gallery);
+    });
+  }
+
+  File _image;
+  Image profileImage, coverImage;
+  _pickProfileImageFromGallery() async {
+    File imageProfile = await ImagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 50); //EditProfilePickProfileImagePreview(image: image)
+    print("cover nick");
+    print(imageProfile);
+    print("cover nick");
+    // Image.file(image);
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => EditProfilePickProfileImagePreview(image: image),
+    //   ),
+    // );
+    setState(() {
+      _profileImage = imageProfile;
+      profileImage = Image.file(_coverImage);
+      // profile = Image.file(File(images =));
+    });
+  }
+
+  _pickCoverImageFromGallery() async {
+    File imageCover = await ImagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 50); //EditProfilePickProfileImagePreview(image: image)
+    print("cover nick");
+    print(imageCover);
+    print("cover nick");
+    // Image.file(image);
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => EditProfilePickProfileImagePreview(image: image),
+    //   ),
+    // );
+    setState(() {
+      _coverImage = imageCover;
+      coverImage = Image.file(_coverImage);
+    });
+    print("cover nick");
+    print(coverImage);
+    print("cover nick");
+  }
+
+  var userData;
+  var token;
+  @override
+  void initState() {
+    super.initState();
+    _read();
+  }
+
+  //Loading counter value on start
+  void _read() async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    var userJson = localStorage.getString('user');
+    var user = json.decode(userJson);
+    print(user['token']);
+    setState(() {
+      userData = user;
+      token = userData['token'];
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomInset: true,
+      appBar: AppBar(
+        centerTitle: true,
+        iconTheme: IconThemeData(
+          color: Colors.black,
+        ),
+        title: Text(
+          "Create Page",
+          style: TextStyle(color: Colors.black, fontSize: 16),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        titleSpacing: 32,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              height: 155,
+              color: Colors.black12,
+              width: double.infinity,
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                        icon: Icon(Icons.add),
+                        onPressed: () {
+                          _pickCoverImageFromGallery();
+                          // Navigator.pop(context);
+                          // Navigator.push(context,
+                          //     MaterialPageRoute(builder: (context) => EditProfile()));
+                        },
+                        color: Colors.black),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Container(
+                          alignment: Alignment.bottomLeft,
+                          height: 90,
+                          decoration: BoxDecoration(
+                              color: Colors.grey, shape: BoxShape.circle),
+                          child: Center(
+                            child: GestureDetector(
+                              child: Container(
+                                height: 85,
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle),
+                                child: Center(
+                                  child: Container(
+                                    height: 80,
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey,
+                                        shape: BoxShape.circle),
+                                    child: Center(
+                                      child: Align(
+                                        child: IconButton(
+                                            icon: Icon(Icons.add),
+                                            onPressed: () {
+                                              _pickProfileImageFromGallery();
+                                              // Navigator.push(context,
+                                              //     MaterialPageRoute(builder: (context) => EditProfile()));
+                                            },
+                                            color: Colors.black),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        )),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Card(
+                    child: TextField(
+                      cursorColor: Colors.black,
+                      controller: pageNameController,
+                      decoration: InputDecoration(
+                        hintText: "Page name",
+                        prefixIcon: Icon(Icons.info),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                  Card(
+                    child: TextField(
+                      controller: pageWebsiteController,
+                      cursorColor: Colors.black,
+                      decoration: InputDecoration(
+                        hintText: "Enter Website",
+                        prefixIcon: Icon(Icons.web),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                  Card(
+                    child: Column(
+                      children: [
+                        TextField(
+                          // enabled: false,
+                          cursorColor: Colors.black,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(
+                              Icons.list,
+                            ),
+                            // suffixIcon: Icon(
+                            //   Icons.search,
+                            //   color: Colors.grey,
+                            // ),
+                            hintText: "Describe this page?",
+                            border: InputBorder.none,
+                          ),
+                          controller: pageAboutController,
+                          maxLines: 8,
+                          minLines: 5,
+                        ),
+                        TextField(
+                          enabled: false,
+                          cursorColor: Colors.black,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(
+                              Icons.list,
+                            ),
+                            // suffixIcon: Icon(
+                            //   Icons.search,
+                            //   color: Colors.grey,
+                            // ),
+                            hintText: "What category describes this page?",
+                            border: InputBorder.none,
+                          ),
+                          controller: pageCategoryController,
+                          // maxLines: 8,
+                          // minLines: 5,
+                        ),
+                        Container(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 8),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: list.map((String data) {
+                                  var index = list.indexOf(data);
+                                  return Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      RaisedButton(
+                                        color: Colors.white,
+                                        onPressed: () {
+                                          var index = list.indexOf(data);
+                                          print(data);
+                                          print(index);
+                                          setState(() {
+                                            pageCategoryController.text = data;
+                                            // changeColor = !changeColor;
+                                          });
+                                        },
+                                        child: Row(
+                                          children: [
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            Text(
+                                              data,
+                                              style: TextStyle(
+                                                  color: Colors.black),
+                                            ),
+                                            SizedBox(
+                                              width: 2,
+                                            ),
+                                            Icon(
+                                              Icons.add,
+                                              size: 15,
+                                            ),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                    ],
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: RaisedButton(
+                      onPressed: () {
+                        //UploadImageDemo
+                        // Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //       builder: (context) => UploadImageDemo(),
+                        //     ));
+                        // _handlePageCreate().whenComplete(() {
+                        //   // Navigator.pop(context);
+                        //   // print("completed");
+                        // }).catchError((onError) {
+                        //   // print("error");
+                        // });
+                      },
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                          side: BorderSide(color: Colors.blue)),
+                      child: Text(
+                        "Next".toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 14.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future _handlePageCreate() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    var data = {
+      'name': pageNameController.text,
+      'website': pageWebsiteController.text,
+      'category_name': pageCategoryController.text,
+      'description': pageAboutController.text,
+      // 'page_photo': profileImage,
+      'cover_photo': coverImage
+
+      // 'page_photo': Image.file(_profileImage),
+      // 'cover_photo': Image.file(_coverImage),
+    };
+    var res = await Network().postData(data, 'user_page/create_page');
+    var body = json.decode(res.body);
+    print(body['success']);
+    print("Nick");
+    print(body);
+    if (body['success']) {
+      print("success");
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+}
